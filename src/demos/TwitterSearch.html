@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!--
+　これはTwitter検索ガジェット。Webページのiframe中に、このガジェットを
+　インクルードし、postMessage() を使って検索文字列を送信すれば、このガジェット
+　が検索を行なう。<script> ではなく、<iframe> 中に含めるので、このガジェットを
+　インクルードするドキュメントを調べることはできない。
+-->
+<html>
+<head>
+<style>body { font: 9pt sans-serif; }</style>
+<!-- jQuery.getJSON() ユーティリティのために jQuery を使う。-->
+<script src="http://code.jquery.com/jquery-1.4.4.min.js"/></script>
+<script>
+// window.onmessage を使うだけでよいはずだが、古いブラウザ（Firefox 3）
+// ではサポートしていないものもあるため、次のような方法を使っている。
+if (window.addEventListener)
+    window.addEventListener("message", handleMessage, false);
+else
+    window.attachEvent("onmessage", handleMessage); // IE8用
+
+function handleMessage(e) {
+    if (e.source !== window.parent) return;
+
+    var searchterm = e.data;
+    // jQuery Ajax ユーティリティとTwitter検索APIを使って、メッセージに
+    // マッチするツイートを探す。
+//    jQuery.getJSON("http://search.twitter.com/search.json?callback=?",
+      jQuery.getJSON("https://api.twitter.com/1.1/search/tweets.json?callback=?",
+                   { q: searchterm },
+                   function(data) { // リクエストの結果として呼び出される。
+                       var tweets = data.results;
+                       var escaped = searchterm.replace("<", "&lt;");
+                       var html = "<h2>" + escaped + "</h2>";
+                       if (tweets.length == 0) {
+                           html += "No tweets found";
+                       }
+                       else {
+                           html += "<dl>";
+                           for (var i = 0; i < tweets.length; i++) {
+                               var tweet = tweets[i];
+                               var text = tweet.text;
+                               var from = tweet.from_user;
+                               var tweeturl = "http://twitter.com/#!/" +
+                                   from + "/status/" + tweet.id_str;
+                               html += "<dt><a target='_blank' href='" +
+                                   tweeturl + "'>" + tweet.from_user +
+                                   "</a></dt><dd>" + tweet.text + "</dd>";
+                           }
+                           html += "</dl>";
+                       }
+                       // <iframe>のドキュメントを設定する。
+                       document.body.innerHTML = html;
+                   });
+}
+
+$(function() {
+    window.parent.postMessage("Twitter Search v1.1", "*")
+});
+</script>
+<head>
+
+<body>
+</body>
+
+</html>

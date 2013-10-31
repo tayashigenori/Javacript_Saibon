@@ -1,0 +1,58 @@
+<html>
+<head></head>
+<body>
+
+<span class="sparkline">3 5 7 6 6 9 11 15</span>
+.sparkline {background-color: #ddd; color: red}
+
+</body>
+</html>
+
+<script>
+onLoad(function() {
+    var elts = document.getElementByClassName("sparkline");
+    main: for(var e = 0; e < elts.length; e++) {
+        var elt = elts[e];
+
+        var content = elt.textContent || elt.innerText;
+        var content = content.replace(/^\s+|\s+$/g, ""); // 先頭末尾の空白を取り除く
+        var text = content.replace(/#.*$/gm, ""); // コメントを取り除く
+        text = text.replace(/[\n\r\t\v\f]/g, " ");
+        var data = text.split(/\s+|\s*,\s*/); // スペース、カンマで分割する
+        for(var i = 0; i < data.length; i++) {
+            data[i] = Number(data[i]);
+            if (isNaN(data[i])) continue main;
+        }
+
+        var style = getComputedStyle(elt, null);
+        var color = style.color;
+        var height = parseInt(elt.getAttribute("data-height")) ||
+            parseInt(style.fontSize) || 20;
+        var width = parseInt(elt.getAttribute("data-width")) ||
+            data.length * (parseInt(elt.getAttribute("data-dx")) || height/6);
+        var ymin = parseInt(elt.getAttribute("data-ymin")) ||
+            Math.min.apply(Math, data);
+        var ymax = parseInt(elt.getAttribute("data-ymax")) ||
+            Math.max.apply(Math, data);
+        if (ymin >= ymax) ymax = ymin + 1;
+
+        // canvas 要素を作成する。
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.title = content;
+        elt.innerHTML = "";
+        elt.appendChild(canvas);
+
+        //
+        var context = canvas.getContext('2d');
+        for(var i = 0; i < data.length; i++) {
+            var x = width*i/data.length;
+            var y = (ymax-data[i])*height/(ymax-ymin);
+            context.lineTo(x,y);
+        }
+        context.strokeStyle = color;
+        context.stroke();
+    }
+});
+</scipt>
