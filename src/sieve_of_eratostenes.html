@@ -1,25 +1,56 @@
-function sieve(n) {
-    var a = new Int8Array(n+1);
-    var max = Math.floor(Math.sqrt(n));
-    var p = 2;
-    while(p <= max) {
-        for(var i = 2*p; i <= n, i += p)
-            a[i] = 1;
-        while(a[++p]) /* empty */
-    }
-    while(a[n]) n--;
-    return n;
-}
+<html>
+<head></head>
 
+<body>
+
+<button type="button" onclick='sieve_test();'>aaaa</button>
+
+
+</body>
+
+<script>
 function sieve_slow(n) {
     var a = new Array(n+1);
     var max = Math.floor(Math.sqrt(n));
     var p = 2;
     while(p <= max) {
-        for(var i = 2*p; i <= n, i += p)
+        for(var i = 2*p; i <= n; i += p) {
             a[i] = 1;
-        while(a[++p]) /* empty */
+        }
+        while(a[++p]) {} /* empty */
     }
-    while(a[n]) n--;
+    while(a[n]) {n--;}
     return n;
 }
+
+function sieve(n) {
+    var a = new Int8Array(n+1);
+    var max = Math.floor(Math.sqrt(n));
+    var p = 2;
+    while(p <= max) {
+        for(var i = 2*p; i <= n; i += p) {
+            a[i] = 1;
+        }
+        while(a[++p]) {} /* empty */
+    }
+    while(a[n]) {n--;}
+    return n;
+}
+
+
+function sieve_test()
+{
+    var startTime = new Date();
+    sieve(10000);
+    var endTime = new Date();
+    var msec_katatsuki = endTime - startTime;
+
+    var startTime = new Date();
+    sieve_slow(10000);
+    var endTime = new Date();
+    var msec_plain = endTime - startTime;
+
+    alert(msec_katatsuki + " msec for Int8Array(), " + msec_plain + " msec for Array()");
+}
+
+</script>
